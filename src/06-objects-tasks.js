@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* ************************************************************************************************
  *                                                                                                *
  * Plese read the following tutorial before implementing tasks:                                   *
@@ -55,9 +56,9 @@ function getJSON(obj) {
  *
  */
 function fromJSON(proto, json) {
-  return Object.setPrototypeOf(JSON.parse(json), proto);
+  const obj = Object.create(proto);
+  return Object.assign(obj, JSON.parse(json));
 }
-
 
 /**
  * Css selectors builder
@@ -113,33 +114,144 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
+class BaseSelector {
+  constructor(value = '') {
+    this.result = value;
+    this.usedMethods = [];
+    this.previousOrder = 0;
+    this.ELEMENT_PRIORITY = 1;
+    this.ID_PRIORITY = 2;
+    this.CLASS_PRIORITY = 3;
+    this.ATTR_PRIORITY = 4;
+    this.PSEUDO_CLASS_PRIORITY = 5;
+    this.PSEUDO_ELEMENT_PRIORITY = 6;
+  }
+
+  validate(priority) {
+    if (priority < this.previousOrder && this.result) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    } else {
+      this.previousOrder = priority;
+    }
+
+    if (this.usedMethods.includes(priority)
+    && [this.ELEMENT_PRIORITY, this.ID_PRIORITY, this.PSEUDO_ELEMENT_PRIORITY].includes(priority)) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    } else {
+      this.usedMethods.push(priority);
+    }
+  }
+
+  element(value) {
+    this.validate(this.ELEMENT_PRIORITY);
+    this.result += value;
+    return this;
+  }
+
+  id(value) {
+    this.validate(this.ID_PRIORITY);
+    this.result += `#${value}`;
+    return this;
+  }
+
+  class(value) {
+    this.validate(this.CLASS_PRIORITY);
+    this.result += `.${value}`;
+    return this;
+  }
+
+  attr(value) {
+    this.validate(this.ATTR_PRIORITY);
+    this.result += `[${value}]`;
+    return this;
+  }
+
+  pseudoClass(value) {
+    this.validate(this.PSEUDO_CLASS_PRIORITY);
+    this.result += `:${value}`;
+    return this;
+  }
+
+  pseudoElement(value) {
+    this.validate(this.PSEUDO_ELEMENT_PRIORITY);
+    this.result += `::${value}`;
+    return this;
+  }
+
+  stringify() {
+    return this.result;
+  }
+}
+
+class ElementSelector extends BaseSelector {
+  constructor(value) {
+    super();
+    this.element(value);
+  }
+}
+
+class IdSelector extends BaseSelector {
+  constructor(value) {
+    super();
+    this.id(value);
+  }
+}
+
+class ClassSelector extends BaseSelector {
+  constructor(value) {
+    super();
+    this.class(value);
+  }
+}
+
+class AttrSelector extends BaseSelector {
+  constructor(value) {
+    super();
+    this.attr(value);
+  }
+}
+
+class PseudoClassSelector extends BaseSelector {
+  constructor(value) {
+    super();
+    this.pseudoClass(value);
+  }
+}
+
+class PseudoElementSelector extends BaseSelector {
+  constructor(value) {
+    super();
+    this.pseudoElement(value);
+  }
+}
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return new ElementSelector(value);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return new IdSelector(value);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return new ClassSelector(value);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return new AttrSelector(value);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return new PseudoClassSelector(value);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return new PseudoElementSelector(value);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const combinedResult = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return new BaseSelector(combinedResult);
   },
 };
 
