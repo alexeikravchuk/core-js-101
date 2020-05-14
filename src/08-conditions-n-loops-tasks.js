@@ -496,8 +496,30 @@ function getMatrixProduct(m1, m2) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  const cells = position.reduce((acc, row) => acc.concat([row[0], row[1], row[2]]), []);
+  const combs = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  let result;
+  combs.some((comb) => {
+    if (cells[comb[0]] === cells[comb[1]]
+       && cells[comb[1]] === cells[comb[2]]
+       && cells[comb[0]] !== undefined) {
+      result = cells[comb[1]];
+      return true;
+    }
+    return false;
+  });
+  return result;
 }
 
 
