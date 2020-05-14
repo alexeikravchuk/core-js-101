@@ -284,9 +284,32 @@ function reverseInteger(num) {
  *   5436468789016589 => false
  *   4916123456789012 => false
  */
-function isCreditCardNumber(/* ccn */) {
-  throw new Error('Not implemented');
+function isCreditCardNumber(digits) {
+  let digitsArr = `${digits}`.split('');
+
+  digitsArr = digitsArr.map((digit, i) => {
+    if (i === digitsArr.length - 1) {
+      return +digit;
+    }
+    if (digitsArr.length % 2 === 0) {
+      if (i % 2 === 0) {
+        const newDigit = digit * 2;
+        return newDigit > 9 ? newDigit - 9 : newDigit;
+      }
+      return +digit;
+    }
+    if (i % 2 !== 0) {
+      const newDigit = digit * 2;
+      return newDigit > 9 ? newDigit - 9 : newDigit;
+    }
+    return +digit;
+  });
+  const sum = digitsArr.reduce((acc, item) => acc + item, 0);
+
+  if (sum % 10 === 0) return true;
+  return false;
 }
+
 
 /**
  * Returns the digital root of integer:
@@ -302,8 +325,9 @@ function isCreditCardNumber(/* ccn */) {
  *   10000 ( 1+0+0+0+0 = 1 ) => 1
  *   165536 (1+6+5+5+3+6 = 26,  2+6 = 8) => 8
  */
-function getDigitalRoot(/* num */) {
-  throw new Error('Not implemented');
+function getDigitalRoot(num) {
+  const sum = `${num}`.split('').reduce((acc, item) => acc + +item, 0);
+  return sum > 9 ? `${sum}`.split('').reduce((acc, item) => acc + +item, 0) : sum;
 }
 
 
@@ -328,8 +352,22 @@ function getDigitalRoot(/* num */) {
  *   '{)' = false
  *   '{[(<{[]}>)]}' = true
  */
-function isBracketsBalanced(/* str */) {
-  throw new Error('Not implemented');
+function isBracketsBalanced(str) {
+  const brackets = '[]{}()<>';
+  const stack = [];
+
+  const result = str.split('').map((bracket) => {
+    const bracketsIndex = brackets.indexOf(bracket);
+    if (bracketsIndex % 2 === 0) {
+      stack.push(bracketsIndex + 1);
+      return true;
+    }
+    if (stack.pop() !== bracketsIndex) {
+      return false;
+    }
+    return true;
+  });
+  return !result.includes(false) && stack.length === 0;
 }
 
 
@@ -353,8 +391,15 @@ function isBracketsBalanced(/* str */) {
  *    365, 4  => '11231'
  *    365, 10 => '365'
  */
-function toNaryString(/* num, n */) {
-  throw new Error('Not implemented');
+function toNaryString(num, n) {
+  let sourseNum = num;
+  const resultIntArray = [];
+  while (sourseNum >= n) {
+    resultIntArray.unshift(sourseNum % n);
+    sourseNum = Math.floor(sourseNum / n);
+  }
+  resultIntArray.unshift(sourseNum);
+  return resultIntArray.join('');
 }
 
 
@@ -370,8 +415,18 @@ function toNaryString(/* num, n */) {
  *   ['/web/assets/style.css', '/.bin/mocha',  '/read.me'] => '/'
  *   ['/web/favicon.ico', '/web-scripts/dump', '/webalizer/logs'] => '/'
  */
-function getCommonDirectoryPath(/* pathes */) {
-  throw new Error('Not implemented');
+function getCommonDirectoryPath(pathes) {
+  let commonPath = '';
+  const folders = pathes.map((path) => path.split('/'));
+  folders[0].some((folder, index) => {
+    const isDifferent = folders.some((path) => folder !== path[index]);
+    if (!isDifferent) {
+      commonPath += `${folder}/`;
+      return false;
+    }
+    return true;
+  });
+  return commonPath;
 }
 
 
@@ -393,8 +448,21 @@ function getCommonDirectoryPath(/* pathes */) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  const aNumRows = m1.length;
+  const aNumCols = m1[0].length;
+  const bNumCols = m2[0].length;
+  const result = new Array(aNumRows);
+  for (let r = 0; r < aNumRows; r += 1) {
+    result[r] = new Array(bNumCols);
+    for (let c = 0; c < bNumCols; c += 1) {
+      result[r][c] = 0;
+      for (let i = 0; i < aNumCols; i += 1) {
+        result[r][c] += m1[r][i] * m2[i][c];
+      }
+    }
+  }
+  return result;
 }
 
 
